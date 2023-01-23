@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.Usertest;
+import com.example.demo.security.utils.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class UsertestController {
@@ -19,9 +21,10 @@ public class UsertestController {
     UserDetailsService userDetailsServiceImpl;
     @Resource
     AuthenticationManager authenticationManager;
-    @GetMapping("login")
-    public String login(@RequestBody(required = false) Usertest usertest){
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Resource
+    JwtUtil jwtUtil;
+    @PostMapping("login")
+    public String login(@RequestBody(required = false) Usertest usertest) {
         usertest=new Usertest();
         usertest.setUsername("1");
         usertest.setPassword("2");
@@ -30,9 +33,9 @@ public class UsertestController {
                 (usertest.getUsername(), usertest.getPassword());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usertest.getUsername());
+        String token = jwtUtil.generateToken(userDetails);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        return "fuckyou";
+        return token;
     }
     @GetMapping("list")
     public String list(){

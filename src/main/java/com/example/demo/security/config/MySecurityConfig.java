@@ -1,5 +1,6 @@
 package com.example.demo.security.config;
 
+import com.example.demo.security.JwtAuthenticationFilter;
 import com.example.demo.security.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.annotation.Resource;
 
@@ -23,7 +25,8 @@ public class MySecurityConfig {
 //    public AuthenticationManager authenticationManager(AuthenticationConfiguration auth) throws Exception {
 //        return auth.getAuthenticationManager();
 //    }
-
+    @Resource
+    JwtAuthenticationFilter jwtAuthenticationFilter;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.
@@ -32,9 +35,10 @@ public class MySecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/login").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers("/").permitAll()
+//                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+//                .antMatchers("/").permitAll()
                 .anyRequest().authenticated();
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
     @Resource
