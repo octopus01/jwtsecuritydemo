@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.Usertest;
+import com.example.demo.security.entity.LoginUser;
 import com.example.demo.security.utils.JwtUtil;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,23 +25,30 @@ public class UsertestController {
     AuthenticationManager authenticationManager;
     @Resource
     JwtUtil jwtUtil;
+    @Resource
+    RedisTemplate<String,Object> redisTemplate;
+
     @PostMapping("login")
-    public String login(@RequestBody(required = false) Usertest usertest) {
+    public String login(@RequestBody(required = false) Usertest usertest,HttpServletRequest request) {
         usertest=new Usertest();
         usertest.setUsername("1");
         usertest.setPassword("2");
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken
-                (usertest.getUsername(), usertest.getPassword());
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
         UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(usertest.getUsername());
-        String token = jwtUtil.generateToken(userDetails);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        LoginUser loginUser = (LoginUser) userDetails;
+        jwtUtil.setUserAgent(loginUser,request);
+        String token = jwtUtil.generateToken(loginUser);
+        redisTemplate.opsForValue().set("user"+loginUser.getUuid(),loginUser);
+        loginUser.setToken(token);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken
+                (loginUser, usertest.getPassword());
+        authenticationManager.authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         return token;
     }
     @GetMapping("list")
     public String list(){
-        SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
         return "list";
     }
 }

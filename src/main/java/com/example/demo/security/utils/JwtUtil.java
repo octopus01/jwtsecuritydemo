@@ -1,6 +1,7 @@
 package com.example.demo.security.utils;
 
 import com.example.demo.security.entity.LoginUser;
+import eu.bitwalker.useragentutils.UserAgent;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -42,6 +43,8 @@ import java.util.UUID;
         @Value("${jwt.expiration}")
         private Long expiration;
 
+        private String uuid;
+
         /**
          * SecretKey 根据 SECRET 的编码方式解码后得到：
          * Base64 编码：SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
@@ -62,13 +65,13 @@ import java.util.UUID;
         private String generateToken(Map<String, Object> claims) {
             SecretKey key = getSecretKey(secret);
             //SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256); //两种方式等价
-
+            uuid= UUID.randomUUID().toString();
             // 添加payload声明
             JwtBuilder jwtBuilder = Jwts.builder()
                     // 如果有私有声明，一定要先设置这个自己创建的私有的声明，这个是给builder的claim赋值，一旦写在标准的声明赋值之后，就是覆盖了那些标准的声明的
                     .setClaims(claims)
                     // 设置jti(JWT ID)：是JWT的唯一标识，根据业务需要，这个可以设置为一个不重复的值，主要用来作为一次性token,从而回避重放攻击。
-                    .setId(UUID.randomUUID().toString())
+                    .setId(uuid)
                     // iat: jwt的签发时间
                     .setIssuedAt(new Date())
 
@@ -103,6 +106,16 @@ import java.util.UUID;
             claims.put("created", new Date());
             return generateToken(claims);
         }
+
+        public String generateToken(LoginUser loginUser){
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("sub", loginUser.getUsername());
+            claims.put("created", new Date());
+            claims.put("uuid",loginUser.getUuid());
+            return generateToken(claims);
+        }
+
+
 
         /**
          * 从token中获取数据声明claim
@@ -189,6 +202,13 @@ import java.util.UUID;
         {
             String token = request.getHeader(header);
             return token;
+        }
+
+        public void setUserAgent(LoginUser loginUser,HttpServletRequest request)
+        {
+            UserAgent userAgent = UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
+            loginUser.setBrowser(userAgent.getBrowser().getName());
+            loginUser.setOs(userAgent.getOperatingSystem().getName());
         }
 
     }
