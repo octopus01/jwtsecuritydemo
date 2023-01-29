@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.UsertestDao">
+    <resultMap type="com.example.demo.entity.Usertest" id="UserRoleMap">
+        <result property="id" column="id1" jdbcType="INTEGER"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <collection property= "roles" ofType="com.example.demo.entity.Role">
+            <id property="id" column="id2" jdbcType="INTEGER"/>
+            <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+    <select id="getAllWithRoles"  resultMap="UserRoleMap">
+        SELECT u.id id1, u.username,role_name,r.id id2 from usertest u
+        LEFT JOIN user_role ur on u.id = ur.`user`
+        LEFT JOIN role r ON ur.`role`=r.id
+    </select>
+
+    <select id="getAllWithRolesById" parameterType="integer" resultMap="UserRoleMap">
+        SELECT u.id id1, u.username,role_name,r.id id2 from usertest u
+        LEFT JOIN user_role ur on u.id = ur.`user`
+        LEFT JOIN role r ON ur.`role`=r.id
+        <where>
+            <if test="id !=null">
+                u.id = #{id};
+            </if>
+        </where>
+    </select>
+    <select id="getRolesById" parameterType="integer" resultType="String">
+        SELECT role_name from usertest u
+        LEFT JOIN user_role ur on u.id = ur.`user`
+        LEFT JOIN role r ON ur.`role`=r.id
+        <where>
+            <if test="id !=null">
+                u.id = #{id};
+            </if>
+        </where>
+    </select>
+</mapper>
+

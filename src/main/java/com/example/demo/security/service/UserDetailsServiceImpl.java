@@ -1,6 +1,7 @@
 package com.example.demo.security.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.example.demo.dao.UsertestDao;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.UserRole;
 import com.example.demo.entity.Usertest;
@@ -31,31 +32,34 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Resource
     UsertestService usertestService;
     @Resource
+    UserRoleService userRoleService;
+    @Resource
     RoleService roleService;
     @Resource
-    UserRoleService userRoleService;
+    UsertestDao usertestDao;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         LambdaQueryWrapper<Usertest> lqw=new LambdaQueryWrapper<>();
         lqw.eq(Usertest::getUsername,username);
         Usertest usertest = usertestService.getOne(lqw);
+
         if(usertest==null){
             log.info("不存在");
             throw new UsernameNotFoundException("登录用户：" + username + " 不存在");
         }
         else {
-            //连表查询
-            int uid = usertest.getId();
             LambdaQueryWrapper<UserRole> lqw1 = new LambdaQueryWrapper<>();
-            lqw1.eq(UserRole::getUser, uid);
-            List<String> RolesNames = roleService.listByIds(userRoleService.list(lqw1))
-                    .stream()
-                    .map(Role::getRoleName).
-                    collect(Collectors.toList());
+            lqw1.eq(UserRole::getUser, usertest.getId());
+            List<UserRole> userRoles = userRoleService.list(lqw1);
+            List<Integer> rolesId = userRoles.stream().map(UserRole::getRole).collect(Collectors.toList());
+            List<Role> roleList = roleService.listByIds(rolesId);
+            List<String> roles = roleList.stream().map(Role::getRoleName).collect(Collectors.toList());
+
+            //连表查询mybatis版
+            //List<String> roles = usertestDao.getRolesById(usertest.getId());
             return new LoginUser(username,
-                    new BCryptPasswordEncoder().encode(usertest.getPassword()),
-                    RolesNames);
+                        new BCryptPasswordEncoder().encode(usertest.getPassword()), roles);
         }
     }
 }

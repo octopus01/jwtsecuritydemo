@@ -28,3 +28,5 @@ jwt:
   # JWT令牌的有效时间，单位秒，默认2周
   expiration: 1209600
   header: Authorization
+mybatis-plus:
+  mapper-locations: classpath*:**/*Dao.xml

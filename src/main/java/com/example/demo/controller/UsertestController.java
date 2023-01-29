@@ -1,9 +1,11 @@
 package com.example.demo.controller;
 
+import com.example.demo.dao.UsertestDao;
 import com.example.demo.entity.Usertest;
 import com.example.demo.security.entity.LoginUser;
 import com.example.demo.security.utils.JwtUtil;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 public class UsertestController {
@@ -46,9 +50,27 @@ public class UsertestController {
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         return token;
     }
+
+//    @PreAuthorize("hasRole('Admin')")
     @GetMapping("list")
     public String list(){
         Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
         return "list";
+    }
+
+    @Resource
+    UsertestDao usertestDao;
+
+    @GetMapping("all")
+    public List<Usertest> getAll(){
+        return usertestDao.getAllWithRoles();
+    }
+    @GetMapping("roles")
+    public Usertest getRoles(){
+        return usertestDao.getAllWithRolesById(1);
+    }
+    @GetMapping("roless/{id}")
+    public List<String> getRole(@PathVariable Integer id){
+        return usertestDao.getRolesById(id);
     }
 }

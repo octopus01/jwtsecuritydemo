@@ -1,11 +1,14 @@
 package com.example.demo.entity;
 
 import com.baomidou.mybatisplus.extension.activerecord.Model;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * (Usertest)表实体类
@@ -21,6 +24,10 @@ public class Usertest extends Model<Usertest>  {
     private  String username;
 
     private String password;
+
+    @Getter
+    @Setter
+    private List<Role> roles;
 
 
 

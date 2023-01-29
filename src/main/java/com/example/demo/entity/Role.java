@@ -12,19 +12,18 @@ import java.io.Serializable;
  */
 @SuppressWarnings("serial")
 public class Role extends Model<Role> {
-    
+
     private Integer id;
-    
+
     private String roleName;
-    
+
     private String doctor;
-    
+
     private Date createTime;
-    
+
     private Date updateTime;
-    
-    private String key;
-    
+
+
     private Integer datascope;
 
 
@@ -68,13 +67,6 @@ public class Role extends Model<Role> {
         this.updateTime = updateTime;
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
 
     public Integer getDatascope() {
         return datascope;

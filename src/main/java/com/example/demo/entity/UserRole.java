@@ -1,7 +1,11 @@
 package com.example.demo.entity;
 
 import com.baomidou.mybatisplus.extension.activerecord.Model;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * (UserRole)表实体类
@@ -11,12 +15,13 @@ import java.io.Serializable;
  */
 @SuppressWarnings("serial")
 public class UserRole extends Model<UserRole> {
-    
+
     private Integer id;
-    
+
     private Integer user;
-    
+
     private Integer role;
+
 
 
     public Integer getId() {
